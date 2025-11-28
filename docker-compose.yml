@@ -1,0 +1,39 @@
+services:
+  db_productos:
+    image: postgres:15-alpine
+    container_name: postgres_productos
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: productos_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_productos_data:/var/lib/postgresql/data
+    networks:
+      - productos_network
+
+  app_productos:
+    build: .
+    container_name: app_productos
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db_productos:5432/productos_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
+      JWT_SECRET: clave-secreta-super-segura-para-aprobar-el-examen
+      AUTH_SERVICE_URL: http://host.docker.internal:8000
+    depends_on:
+      - db_productos
+    networks:
+      - productos_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  postgres_productos_data:
+
+networks:
+  productos_network:
+    driver: bridge

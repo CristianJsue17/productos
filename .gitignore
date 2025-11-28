@@ -1,0 +1,69 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+target/
+build/
+!gradle-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+.settings/
+.classpath
+.project
+*.swp
+*.swo
+*~
+
+# Spring Boot
+*.log
+logs/
+spring.log
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+application-local.yml
+application-local.properties
+
+# Docker
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+*.tfvars
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Secrets
+secrets/
+*.pem
+*.key
+*.crt
