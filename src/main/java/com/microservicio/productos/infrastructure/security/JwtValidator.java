@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/infrastructure/security/JwtValidator.java
 package com.microservicio.productos.infrastructure.security;
 
 import io.jsonwebtoken.Claims;

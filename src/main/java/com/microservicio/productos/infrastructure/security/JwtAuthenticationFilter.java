@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/infrastructure/security/JwtAuthenticationFilter.java
 package com.microservicio.productos.infrastructure.security;
 
 import jakarta.servlet.FilterChain;
@@ -25,7 +26,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response, 
                                     FilterChain filterChain) throws ServletException, IOException {
         
-        String authHeader = request.getHeader("Authorization");
+        // ← CAMBIO: Buscar en X-Auth-Token en lugar de Authorization
+        String authHeader = request.getHeader("X-Auth-Token");
+        
+        // ← FALLBACK: Si no existe X-Auth-Token, buscar en Authorization (para compatibilidad local)
+        if (authHeader == null || authHeader.isEmpty()) {
+            authHeader = request.getHeader("Authorization");
+        }
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
