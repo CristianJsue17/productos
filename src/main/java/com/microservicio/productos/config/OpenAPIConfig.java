@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/config/OpenAPIConfig.java
 package com.microservicio.productos.config;
 
 import io.swagger.v3.oas.models.Components;

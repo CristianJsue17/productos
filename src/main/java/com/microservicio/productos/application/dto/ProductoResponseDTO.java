@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/application/dto/ProductoResponseDTO.java
 package com.microservicio.productos.application.dto;
 
 import lombok.AllArgsConstructor;

@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/domain/repository/ProductoRepository.java
 package com.microservicio.productos.domain.repository;
 
 import com.microservicio.productos.domain.model.Producto;

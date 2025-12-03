@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/ProductosApplication.java
 package com.microservicio.productos;
 
 import org.springframework.boot.SpringApplication;

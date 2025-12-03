@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/infrastructure/controller/ProductoController.java
 package com.microservicio.productos.infrastructure.controller;
 
 import com.microservicio.productos.application.dto.ProductoRequestDTO;

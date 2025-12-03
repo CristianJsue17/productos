@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/application/usecase/ProductoUseCase.java
 package com.microservicio.productos.application.usecase;
 
 import com.microservicio.productos.application.dto.ProductoRequestDTO;

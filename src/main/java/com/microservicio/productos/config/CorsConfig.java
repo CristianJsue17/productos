@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/config/CorsConfig.java
 package com.microservicio.productos.config;
 
 import org.springframework.context.annotation.Bean;

@@ -1,0 +1,155 @@
+name: Deploy Productos to EKS
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'pom.xml'
+      - 'Dockerfile.prod'
+      - '.github/workflows/deploy.yml'
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: microservicios/productos
+  EKS_CLUSTER_NAME: microservicios-eks-cluster
+  DEPLOYMENT_NAME: productos
+  NAMESPACE: microservicios
+
+jobs:
+  test-build-deploy:
+    name: Test, Build & Deploy
+    runs-on: ubuntu-latest
+    
+    steps:
+      # ==========================================
+      # 1. CHECKOUT CÓDIGO
+      # ==========================================
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+      
+      # ==========================================
+      # 2. EJECUTAR TESTS
+      # ==========================================
+      - name: 🧪 Run Maven Tests
+        run: |
+          echo "🧪 Ejecutando tests con Maven..."
+          docker run --rm -v $(pwd):/app -w /app \
+            maven:3.9.5-eclipse-temurin-21 mvn test
+      
+      - name: ✅ Tests passed
+        if: success()
+        run: echo "✅ Todos los tests pasaron correctamente"
+      
+      - name: ❌ Tests failed
+        if: failure()
+        run: |
+          echo "❌ Los tests fallaron. Deployment cancelado."
+          exit 1
+      
+      # ==========================================
+      # 3. CONFIGURAR AWS
+      # ==========================================
+      - name: ⚙️ Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      # ==========================================
+      # 4. LOGIN A ECR
+      # ==========================================
+      - name: 🔐 Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      
+      # ==========================================
+      # 5. BUILD & PUSH DOCKER IMAGE
+      # ==========================================
+      - name: 🐳 Build, tag, and push image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "🏗️ Construyendo imagen Docker..."
+          docker build -f Dockerfile.prod -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          
+          echo "📤 Subiendo imagen a ECR..."
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          
+          echo "🏷️ Taggeando como 'latest'..."
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          
+          echo "✅ Imagen subida: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      
+      # ==========================================
+      # 6. INSTALAR KUBECTL
+      # ==========================================
+      - name: 🔧 Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+      
+      # ==========================================
+      # 7. ACTUALIZAR KUBECONFIG
+      # ==========================================
+      - name: ☸️ Update kubeconfig
+        run: |
+          echo "🔄 Actualizando kubeconfig para EKS..."
+          aws eks update-kubeconfig \
+            --name $EKS_CLUSTER_NAME \
+            --region $AWS_REGION
+          
+          echo "✅ Kubeconfig actualizado"
+          kubectl get nodes
+      
+      # ==========================================
+      # 8. DEPLOY A EKS
+      # ==========================================
+      - name: 🚀 Deploy to EKS
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "🚀 Actualizando deployment en EKS..."
+          kubectl set image deployment/$DEPLOYMENT_NAME \
+            productos=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -n $NAMESPACE
+          
+          echo "⏳ Esperando rollout..."
+          kubectl rollout status deployment/$DEPLOYMENT_NAME \
+            -n $NAMESPACE \
+            --timeout=5m
+          
+          echo "✅ Deployment completado exitosamente"
+      
+      # ==========================================
+      # 9. VERIFICAR DEPLOYMENT
+      # ==========================================
+      - name: 🔍 Verify deployment
+        run: |
+          echo "📊 Estado de los pods:"
+          kubectl get pods -n $NAMESPACE -l app=productos
+          
+          echo ""
+          echo "📋 Información del deployment:"
+          kubectl describe deployment $DEPLOYMENT_NAME -n $NAMESPACE | grep -A 5 "Replicas:"
+          
+          echo ""
+          echo "✅ Verificación completada"
+      
+      # ==========================================
+      # 10. NOTIFICACIÓN DE ÉXITO
+      # ==========================================
+      - name: 🎉 Deployment successful
+        if: success()
+        run: |
+          echo "════════════════════════════════════════"
+          echo "✅ DEPLOYMENT EXITOSO"
+          echo "════════════════════════════════════════"
+          echo "Imagen: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "════════════════════════════════════════"

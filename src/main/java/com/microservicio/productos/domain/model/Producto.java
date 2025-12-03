@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/domain/model/Producto.java
 package com.microservicio.productos.domain.model;
 
 import jakarta.persistence.*;

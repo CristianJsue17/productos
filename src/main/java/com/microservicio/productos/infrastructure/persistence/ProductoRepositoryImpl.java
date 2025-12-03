@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/infrastructure/persistence/ProductoRepositoryImpl.java
 package com.microservicio.productos.infrastructure.persistence;
 
 import com.microservicio.productos.domain.model.Producto;

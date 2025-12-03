@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/infrastructure/controller/HealthController.java
 package com.microservicio.productos.infrastructure.controller;
 
 import io.swagger.v3.oas.annotations.Operation;

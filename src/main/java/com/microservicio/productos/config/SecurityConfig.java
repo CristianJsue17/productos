@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/config/SecurityConfig.java
 package com.microservicio.productos.config;
 
 import com.microservicio.productos.infrastructure.security.JwtAuthenticationFilter;

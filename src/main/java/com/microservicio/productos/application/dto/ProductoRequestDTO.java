@@ -1,3 +1,4 @@
+// src/main/java/com/microservicio/productos/application/dto/ProductoRequestDTO.java
 package com.microservicio.productos.application.dto;
 
 import jakarta.validation.constraints.*;
